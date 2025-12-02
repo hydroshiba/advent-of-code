@@ -1,4 +1,9 @@
 # Binaries
-.exe
-.out
-.o
+*.exe
+*.out
+*.o
+
+# I/O files
+in.txt
+out.txt
+io/*
