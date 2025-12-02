@@ -33,7 +33,7 @@ make 1-1-cpp < input.txt
 | Puzzle | Solution           | Part 1            | Part 2            |
 |--------|--------------------|-------------------|-------------------|
 | Day 1  | [Day 1](01/sol.md) | [cpp](01/1-1.cpp) | [cpp](01/1-2.cpp) |
-| Day 2  |                    |                   |                   |
+| Day 2  |                    | [py](02/2-1.py)   | [py](02/2-2.py)   |
 | Day 3  |                    |                   |                   |
 | Day 4  |                    |                   |                   |
 | Day 5  |                    |                   |                   |
