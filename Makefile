@@ -47,6 +47,11 @@ default:
 %-py: %.py
 	@$(PY) $<
 
+%-cs: %.cs
+	@if [ ! -d ".cs_runner" ]; then dotnet new console -o .cs_runner > /dev/null; fi
+	@cp $< .cs_runner/Program.cs
+	@dotnet run --project .cs_runner --no-restore
+
 .DEFAULT:
 	@$(MAKE) --no-print-directory default
 	@printf "$(RED)Error: The target '$@' is not valid.$(RESET)\n"

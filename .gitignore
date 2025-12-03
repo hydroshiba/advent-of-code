@@ -6,4 +6,7 @@
 # I/O files
 in.txt
 out.txt
-io/*
+io/
+
+# C# abomination
+.cs_runner/
