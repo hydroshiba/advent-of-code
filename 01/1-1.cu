@@ -6,8 +6,12 @@
 
 const int THREADS = 1024;
 
-// SOLVING THE PREFIX SUM PROBLEM
+// CUDA KERNELS
 /* ############################################################# */
+
+__device__ __inline__ int condition(int val) {
+	return !(val % 100);
+}
 
 __global__ void block_scan(int* arr, int n, int* aux) {
 	__shared__ int mem[THREADS], buffer[THREADS];
@@ -45,31 +49,6 @@ __global__ void block_adjust(int* arr, int n, int* aux) {
 	if(blockIdx.x > 0) arr[i] += aux[blockIdx.x - 1];
 }
 
-void prefix_sum(int* arr, int n, int* aux) {
-	int blocks = (n + THREADS - 1) / THREADS;
-	
-	block_scan<<<blocks, THREADS>>>(arr, n, aux);
-	if(blocks > 1) prefix_sum(aux, blocks, aux + blocks);
-	block_adjust<<<blocks, THREADS>>>(arr, n, aux);
-}
-
-void prefix_sum(int* arr, int n) {
-	int* aux = nullptr;
-	int blocks = (n + THREADS - 1) / THREADS;
-	cudaMalloc((void**)&aux, (8 * blocks * sizeof(int)) / 7);
-
-	prefix_sum(arr, n, aux);
-	cudaDeviceSynchronize();
-	cudaFree(aux);
-}
-
-// SOLVING THE VALUE COUNTING PROBLEM
-/* ############################################################# */
-
-__device__ __inline__ int condition(int val) {
-	return !(val % 100);
-}
-
 __global__ void count_naive(int* arr, int n, int* count) {
 	int i = blockIdx.x * blockDim.x + threadIdx.x;
 	if(i >= n) return;
@@ -95,19 +74,42 @@ __global__ void count_reduce(int* arr, int n, int* count) {
 	if(x == 0) atomicAdd(count, mem[x]);
 }
 
-int value_count(int* arr, int n) {
-	int cnt;
-	int* dcnt;
-	cudaMalloc((void**)&dcnt, sizeof(int));
-	cudaMemset(dcnt, 0, sizeof(int));
+// ACTUALLY SOLVING THE PUZZLE
+/* ############################################################# */
 
+void prefix_sum(int* arr, int n, int* aux) {
 	int blocks = (n + THREADS - 1) / THREADS;
-	count_naive<<<blocks, THREADS>>>(arr, n, dcnt);
-	cudaDeviceSynchronize();
+	
+	block_scan<<<blocks, THREADS>>>(arr, n, aux);
+	if(blocks > 1) prefix_sum(aux, blocks, aux + blocks);
+	block_adjust<<<blocks, THREADS>>>(arr, n, aux);
+}
 
-	cudaMemcpy(&cnt, dcnt, sizeof(int), cudaMemcpyDeviceToHost);
-	cudaFree(dcnt);
-	return cnt;
+int solve(int* arr, int n) {
+	Timer timer;
+	int ans, blocks = (n + THREADS - 1) / THREADS;
+	int* ans_dev = nullptr;
+	int* aux = nullptr;
+
+	cudaMalloc((void**)&ans_dev, sizeof(int)); cudaMemset(ans_dev, 0, sizeof(int));
+	cudaMalloc((void**)&aux, 2 * blocks * sizeof(int));
+
+	timer.start();
+	prefix_sum(arr, n, aux);
+	timer.stop();
+	std::cerr << "Prefix sum time: " << timer.milliseconds() << " ms\n";
+
+	timer.start();
+	// Naive kernel seems to do better because of low count rate
+	count_naive<<<blocks, THREADS>>>(arr, n, ans_dev);
+	timer.stop();
+	std::cerr << "Count time: " << timer.milliseconds() << " ms\n";
+
+	cudaMemcpy(&ans, ans_dev, sizeof(int), cudaMemcpyDeviceToHost);
+	cudaFree(ans_dev);
+	cudaFree(aux);
+
+	return ans;
 }
 
 int main() {
@@ -124,27 +126,13 @@ int main() {
 		vec.push_back(c == 'L' ? -num : num);
 	}
 
-	// Copy to device
 	int n = vec.size();
 	int* data = nullptr;
 
 	cudaMalloc((void**)&data, n * sizeof(int));
 	cudaMemcpy(data, vec.data(), n * sizeof(int), cudaMemcpyHostToDevice);
-
-	Timer timer;
-
-	timer.start();
-	prefix_sum(data, n);
-	timer.stop();
-
-	std::cerr << "Prefix sum taken: " << timer.milliseconds() << " ms" <<  std::endl;
-
-	timer.start();
-	int ans = value_count(data, n);
-	timer.stop();
-
-	std::cerr << "Value count taken: " << timer.milliseconds() << " ms" <<  std::endl;
 	
-	std::cout << ans << std::endl;
+	int ans = solve(data, n);
 	cudaFree(data);
+	std::cout << ans;
 }
