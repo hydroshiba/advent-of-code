@@ -36,12 +36,12 @@ __global__ void block_scan(int* arr, int n, int* aux) {
 	}
 
 	if(i < n) arr[i] = in[x];
-	if(x == blockDim.x - 1) aux[blockIdx.x] = mem[x];
+	if(x == blockDim.x - 1) aux[blockIdx.x] = in[x];
 }
 
 __global__ void block_adjust(int* arr, int n, int* aux) {
 	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	if(i > n) return;
+	if(i >= n) return;
 	if(blockIdx.x > 0) arr[i] += aux[blockIdx.x - 1];
 }
 
