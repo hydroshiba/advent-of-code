@@ -4,7 +4,7 @@
 
 #include "timer.cuh"
 
-const int THREADS = 1024;
+const int THREADS = 128;
 
 // CUDA KERNELS
 /* ############################################################# */
