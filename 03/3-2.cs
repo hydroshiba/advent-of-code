@@ -29,6 +29,7 @@ class AdventOfCode {
 
 			// Iterate all indices at the kth row and take the max constructible
 			// value from k digits
+			
 			long val = dp[k].Max();
 			ans += val;
 		}
