@@ -12,7 +12,7 @@ I also have a fair share amount of skills I want to try out, and AoC is the perf
 
 ## Running the solutions
 
-I've make a simple Makefile to build and run the solutions. The command to run a solution is as follows:
+I've made a simple Makefile to build and run the solutions. The command to run a solution is as follows:
 
 ```bash
 make {day}-{part}-{lang}
