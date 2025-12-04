@@ -13,13 +13,17 @@ RESET   := \033[0m
 
 # Language compilers and flags
 
-CXX = g++
+CXX = $(shell which g++ 2>/dev/null || which clang++ 2>/dev/null)
 CXXFLAGS = -O2 -std=c++17
 
 CUDA = nvcc
 CUDAFLAGS = -O2 -std=c++17
 
+PAS = $(shell which fpc 2>/dev/null || which gpc 2>/dev/null || which ppc 2>/dev/null || which ppca64 2>/dev/null)
+PASFLAGS = -O2 -Mdelphi -v0 -k-w -FU.tmp -FE. -l-
+
 PY = python3
+CS = dotnet
 
 # Directories
 
@@ -48,9 +52,15 @@ default:
 	@$(PY) $<
 
 %-cs: %.cs
-	@if [ ! -d ".cs_runner" ]; then dotnet new console -o .cs_runner > /dev/null; fi
+	@if [ ! -d ".cs_runner" ]; then $(CS) new console -o .cs_runner > /dev/null; fi
 	@cp $< .cs_runner/Program.cs
-	@dotnet run --project .cs_runner --no-restore
+	@$(CS) run --project .cs_runner --no-restore
+
+%-pas: %.pas
+	@if [ ! -d ".tmp" ]; then mkdir .tmp; fi
+	@$(PAS) $(PASFLAGS) $< -o$@.out
+	@rm -rf .tmp
+	@./$@.out
 
 .DEFAULT:
 	@$(MAKE) --no-print-directory default

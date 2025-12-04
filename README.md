@@ -35,7 +35,7 @@ make 1-1-cpp < input.txt
 | Day 1  | [Day 1](01/sol.md) | [cpp](01/1-1.cpp), [cu](01/1-1.cu) | [cpp](01/1-2.cpp), [cu](01/1-2.cu) |
 | Day 2  |                    | [py](02/2-1.py)                    | [py](02/2-2.py)                    |
 | Day 3  |                    | [cs](03/3-1.cs)                    | [cs](03/3-2.cs)                    |
-| Day 4  |                    |                                    |                                    |
+| Day 4  |                    | [pas](04/4-1.pas)                  | [pas](04/4-2.pas)                  |
 | Day 5  |                    |                                    |                                    |
 | Day 6  |                    |                                    |                                    |
 | Day 7  |                    |                                    |                                    |
@@ -44,4 +44,3 @@ make 1-1-cpp < input.txt
 | Day 10 |                    |                                    |                                    |
 | Day 11 |                    |                                    |                                    |
 | Day 12 |                    |                                    |                                    |
-
